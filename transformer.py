@@ -6,10 +6,13 @@ class EncoderLayer(nn.Module):
     def __init__(self):
         super().__init__()
         self.attlayer = MultiheadSelfAttention(input_dim=768,heads=12,drop_rate=0.5,is_decoder=False)
+        self.linear = nn.Linear(768,768)
+        self.layernorm = nn.LayerNorm(768)
 
     def forward(self,x,seq_len):
         #shortcut层
         x = x + self.attlayer(x,seq_len)
+        x = self.layernorm(self.linear(x)) + x
         return x
 
 class DecoderLayer(nn.Module):
@@ -17,12 +20,16 @@ class DecoderLayer(nn.Module):
         super().__init__()
         self.attlayer1 = MultiheadSelfAttention(input_dim=768,heads=12,drop_rate=0.5,is_decoder=True)
         self.attlayer2 = MultiheadCrossAttention(input_dim=768,heads=12,drop_rate=0.5)
+        self.linear = nn.Linear(768,768)
+        self.layernorm = nn.LayerNorm(768)
+
     def forward(self,q,kv,seq_len,kv_seq_len):
         #kv来自encoder
         #q, seq_len, kv = None, kv_seq_len = None
         #print(q.shape,self.attlayer1(q=q,kv=kv,seq_len=seq_len,kv_seq_len=max(seq_len)).shape)
         x = q + self.attlayer1(q=q,seq_len=seq_len)
         x = x + self.attlayer2(q=q,kv=kv,seq_len=seq_len,kv_seq_len=kv_seq_len)
+        x = self.layernorn(self.linear(x)) +x
         return x
 
 class Encoder(nn.Module):
@@ -73,4 +80,4 @@ if __name__ == "__main__":
     encoder_out,decoder_out = transformer(x_encoder,x_decoder,encoder_seq_len,decoder_seq_len)
     #decoder = Decoder()
     #x = decoder(x,kv,seq_len,kv_seq_len)
-    print()
+    print(decoder_out)
