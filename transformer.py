@@ -29,7 +29,7 @@ class DecoderLayer(nn.Module):
         #print(q.shape,self.attlayer1(q=q,kv=kv,seq_len=seq_len,kv_seq_len=max(seq_len)).shape)
         x = q + self.attlayer1(q=q,seq_len=seq_len)
         x = x + self.attlayer2(q=q,kv=kv,seq_len=seq_len,kv_seq_len=kv_seq_len)
-        x = self.layernorn(self.linear(x)) +x
+        x = self.layernorm(self.linear(x)) +x
         return x
 
 class Encoder(nn.Module):
